@@ -7,7 +7,6 @@
 #include <string>
 #include <queue>
 #include <unordered_map>
-
 using namespace std;
 
 map<pair<char, char>, int> pairs;
@@ -25,7 +24,9 @@ void number_of_pairs(){
     char prev;
     char current;
     bool has_prev = false;
+    int total_chars = 0;
     while (in_file.get(current)) {
+        total_chars++;
         if (has_prev) {
             pairs[{prev, current}]++;
             has_prev = false;
@@ -38,7 +39,10 @@ void number_of_pairs(){
     if (has_prev) {
         pairs[{prev, '\0'}]++; 
     }
+
     in_file.close();
+
+    cout << "Total number of characters in the file: " << total_chars << endl;
 }
 
 struct Node{
@@ -87,7 +91,7 @@ void encoding(){
         table.put(entry.first.second);
         table.put('\0');              
         table.write(entry.second.c_str(), entry.second.size());
-        table.put('\0');   
+        table.put('\0'); 
     }
     table.close();
 
@@ -107,7 +111,7 @@ void encoding(){
         }
     }
     if (has_prev) {
-        string code = codes[{prev, '\0'}];
+        string code = codes[{prev, 0xFF}];
         for (char bit : code) bits.push_back(bit == '1');
     }
 
@@ -126,7 +130,7 @@ void encoding(){
         byte <<= (8 - bit_count);
         zip_file.put(byte);
     }
-    
+
     input_file.close();
     zip_file.close();
 }   
@@ -173,13 +177,14 @@ void decoding(){
             auto it = codePairsChars.find(current_code);
             if (it != codePairsChars.end()) {
                 dec_file.put(it->second.first);
-                if (it->second.second != '\0') {
+                if (it->second.second != 0xFF) {
                     dec_file.put(it->second.second);
                 }
                 current_code.clear();
             }
         }
     }
+    
     zip_file.close();
     dec_file.close();
 }
